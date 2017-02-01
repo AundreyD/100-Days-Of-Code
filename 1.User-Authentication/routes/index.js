@@ -1,16 +1,17 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user');
+var mid = require('../middleware');
 
 
 
-//Get .profile
-router.get('/profile', function(req, res, next){
-  if(! req.session.userId){
-    var err= new Error('You are not authorized to view this page');
-    err.status = 403;
-    return next(err);
-  }
+//Get /profile
+router.get('/profile',mid.requiresLogin, function(req, res, next){
+  // if(! req.session.userId){
+  //   var err= new Error('You are not authorized to view this page');
+  //   err.status = 403;
+  //   return next(err);
+  // }
   User.findById(req.session.userId)
     .exec((error, user) => {
       if(error){
@@ -35,7 +36,7 @@ router.get('/logout', (req, res, next) => {
   }
 });
 //GET /logins
-router.get('/login', (req, res, next) => {
+router.get('/login',mid.loggedOut, (req, res, next) => {
   return res.render('login', {title: 'Log in'});
 });
 
@@ -60,7 +61,7 @@ router.post('/login', (req, res, next) => {
 });
 
 // GET /register
-router.get('/register', function(req, res, next) {
+router.get('/register', mid.loggedOut, function(req, res, next) {
   return res.render('register', { title: 'Sign Up' });
 });
 
